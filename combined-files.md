@@ -19,6 +19,7 @@
 ├── combined-files.md
 ├── package-lock.json
 ├── package.json
+├── postman.json
 └── tsconfig.json
 
 ```
@@ -28,18 +29,18 @@
 ## src\app.ts
 
 ```typescript
-import errorHandler from "./middleware/errorHandler";
 import "dotenv/config";
+import connectDB from "./db";
+import errorHandler from "./middleware/errorHandler";
 const PORT = process.env.PORT || 3333;
 import { productsRoutes } from "./routes/products-routes";
 import express from "express";
 const app = express();
-app.use(errorHandler);
 app.use(express.json());
 app.use("/products", productsRoutes);
+app.use(errorHandler);
 
 
-import connectDB from "./db";
 
 app.get("/", (req, res) => {
     res.status(200).json({ message: "Home page." });
@@ -106,6 +107,58 @@ export const getProductById: RequestHandler = async (req: Request, res: Response
         next(error);
     }
 }
+
+// delProductById
+
+export const delProductById: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            res.status(400).json({ message: "Wrong ID" });
+            return;
+        }
+
+        const deletedProduct = await Product.findByIdAndDelete(id);
+
+        if (!deletedProduct) {
+            res.status(404).json({ message: "Product not found" });
+            return;
+        }
+
+
+        res.status(200).json({ message: `Product ID:${id} deleted successfully` })
+    }
+
+    catch (error) {
+        console.log(error);
+        next(error);
+    }
+}
+
+export const updateProduct: RequestHandler = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { name, price, description } = req.body;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            res.status(400).json({ message: "Invalid product ID" });
+            return;
+        }
+
+        // const updatedProduct = await Product.findByIdAndUpdate(id, { name, price, description }, { new: true });
+        const updatedProduct = await Product.findByIdAndUpdate(id, { name, price, description });
+
+        if (!updatedProduct) {
+            res.status(404).json({ message: "Product not found" });
+            return;
+        }
+
+        res.status(200).json(updatedProduct);
+    } catch (error) {
+        next(error);
+    }
+};
 
 ```
 
@@ -184,13 +237,15 @@ export default mongoose.model("Product", ProductSchema);
 
 ```typescript
 import { Router } from "express";
-import { addNewProduct, getAllProducts, getProductById } from "../controllers/product-controller";
+import { addNewProduct, getAllProducts, getProductById, delProductById, updateProduct } from "../controllers/product-controller";
 
 export const productsRoutes = Router();
 
 productsRoutes.post("/", addNewProduct);
 productsRoutes.get("/", getAllProducts);
 productsRoutes.get("/:id", getProductById);
+productsRoutes.delete("/:id", delProductById);
+productsRoutes.put("/:id", updateProduct);
 ```
 
 # Дополнительные файлы

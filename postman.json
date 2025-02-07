@@ -1,0 +1,71 @@
+{
+    "info": {
+      "_postman_id": "unique-id",
+      "name": "Product API",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+      {
+        "name": "Get All Products",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "http://localhost:3333/products",
+            "protocol": "http",
+            "host": ["localhost"],
+            "port": "3333",
+            "path": ["products"]
+          }
+        },
+        "response": []
+      },
+      {
+        "name": "Add New Product",
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"name\": \"Sample Product\",\n  \"description\": \"This is a sample product\",\n  \"price\": 100\n}"
+          },
+          "url": {
+            "raw": "http://localhost:3333/products",
+            "protocol": "http",
+            "host": ["localhost"],
+            "port": "3333",
+            "path": ["products"]
+          }
+        },
+        "response": []
+      },
+      {
+        "name": "Get Product By ID",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "http://localhost:3333/products/:id",
+            "protocol": "http",
+            "host": ["localhost"],
+            "port": "3333",
+            "path": ["products", ":id"],
+            "variable": [
+              {
+                "key": "id",
+                "value": "PUT_PRODUCT_ID_HERE",
+                "description": "Replace with actual product ID"
+              }
+            ]
+          }
+        },
+        "response": []
+      }
+    ]
+  }
+  
