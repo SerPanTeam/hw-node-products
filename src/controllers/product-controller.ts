@@ -3,28 +3,38 @@ import { Request, RequestHandler, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 
 export const getAllProducts = async (req: Request, res: Response) => {
-    const products = await Product.find();
+    const products = await Product.find().populate("category"); // Добавляем категории
     res.status(200).json(products);
-}
+};
+
+
+import Category from "../models/Category";
 
 export const addNewProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { name, price, description } = req.body;
-        if (!name || !price || !description) {
+        const { name, price, description, category } = req.body;
+
+        if (!name || !price || !description || !category) {
             res.status(400).json({ message: "Missing required fields" });
             return;
         }
-        const newProduct = new Product({ name, price, description });
-        await newProduct.save();
-        res.status(201).json(newProduct);
 
+        // Проверяем, существует ли такая категория
+        const categoryExists = await Category.findById(category);
+        if (!categoryExists) {
+            res.status(400).json({ message: "Invalid category ID" });
+            return;
+        }
+
+        const newProduct = new Product({ name, price, description, category });
+        await newProduct.save();
+
+        res.status(201).json(newProduct);
     } catch (error) {
-        console.log("Error with added new product!", error);
-        // res.status(500).json({ message: "Error with added new product!" });
-        // return;
         next(error);
     }
-}
+};
+
 
 export const getProductById: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     try {
